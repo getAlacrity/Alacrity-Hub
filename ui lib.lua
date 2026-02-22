@@ -402,14 +402,14 @@ AddDrag(Title_2, Main)
             Update(25)
         end
 
-        function Window:Slider(name, options, callback)
-            local default = options.default or options.min
-            local min = options.min or 0
-            local max = options.max or 1
-            local location = options.location or self.flags
-            local precise = options.precise or false
-            local flag = options.flag or ""
-            local callback = callback or function() end
+function Window:Slider(name, options, callback)
+    local default = options.default or options.min
+    local min = options.min or 0
+    local max = options.max or 1
+    local location = options.location or self.flags
+    local precise = options.precise or false
+    local flag = options.flag or ""
+    local callback = callback or function() end
 
             local Slider = Instance.new("Frame")
             local Text = Instance.new("TextLabel")
@@ -518,47 +518,44 @@ AddDrag(Title_2, Main)
                 Text_6.Text = default
                 Fill.Size = UDim2.new(0,134/(min +(max - min)) * default,0,6)
 
-            local MouseDown = nil
-            local function MakeChange()
-                MouseDown = true 
-                local Check
-                spawn(function()
-                    repeat game:GetService("RunService").RenderStepped:wait()
-                        Fill.Size = UDim2.new(0,-(Fill.AbsolutePosition.X - game.Players.LocalPlayer:GetMouse().X - 3),0,6)
-                    until MouseDown == false
-                    Check:Disconnect()
-                end)
-                Check = Fill.Changed:Connect(function()
-                    if precise then
-                        location[flag] = min + math.ceil(((max - min)/134) * (Fill.AbsoluteSize.X - 6))
-                        Text_6.Text = tostring(location[flag])
-                    else
-                        location[flag] = min + roundDecimals(((max - min)/134) * (Fill.AbsoluteSize.X - 6),2)
-                        Text_6.Text = location[flag]
-                    end
-                    spawn(callback)
-                    if MouseDown == false then
-                        Check:Disconnect()
-                    end
-                end)
+           local MouseDown = false
+
+    local function MakeChange(startPosX)
+        MouseDown = true
+        local connection
+        connection = RunService.RenderStepped:Connect(function()
+            if MouseDown then
+                local mouseX = UIS:GetMouseLocation().X
+                local delta = math.clamp(mouseX - startPosX, 0, 134) -- 限制 Fill 寬度
+                Fill.Size = UDim2.new(0, delta, 0, 6)
+
+                -- 計算數值
+                if precise then
+                    location[flag] = min + math.ceil(((max - min)/134) * delta)
+                else
+                    location[flag] = min + roundDecimals(((max - min)/134) * delta, 2)
+                end
+                Text_6.Text = tostring(location[flag])
+                spawn(callback)
+            else
+                connection:Disconnect()
             end
-            Fill.InputBegan:connect(function(inp)
-                if inp.UserInputType.Value == 0 then 
-                    MakeChange()
-                end
-            end)
-            Fill.InputEnded:connect(function(inp)
-                if inp.UserInputType.Value == 0 then 
-                    MouseDown = false
-                end
-            end)
-            local Player = game:GetService("Players").LocalPlayer
-            local Mouse = Player:GetMouse()
-            Mouse.Button1Up:Connect(function()
-                MouseDown = false
-            end)
-            Update(30)
+        end)
+    end
+
+    Fill.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            local startPosX = UIS:GetMouseLocation().X - Fill.AbsoluteSize.X
+            MakeChange(startPosX)
         end
+    end)
+
+    Fill.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            MouseDown = false
+        end
+    end)
+end
 
         function Window:Dropdown(name, options, callback)
             local location   = options.location or self.flags
