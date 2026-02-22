@@ -1,4 +1,5 @@
-    --https://v3rmillion.net/member.php?action=profile&uid=1715331
+-- fixed
+--https://v3rmillion.net/member.php?action=profile&uid=1715331
     local Lib = {}
     if game.CoreGui:FindFirstChild("Lib") then
         game.CoreGui:FindFirstChild("Lib"):Destroy()
