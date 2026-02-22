@@ -411,142 +411,95 @@ function Window:Slider(name, options, callback)
     local flag = options.flag or ""
     local callback = callback or function() end
 
-            local Slider = Instance.new("Frame")
-            local Text = Instance.new("TextLabel")
-            local sliderHolder = Instance.new("Frame")
-            local Main2 = Instance.new("ImageLabel")
-            local Fill = Instance.new("ImageLabel")
-            local UISizeConstraint = Instance.new("UISizeConstraint")
-            local Holder = Instance.new("Frame")
-            local Text_6 = Instance.new("TextBox")
-            
-            Holder.Name = "Holder"
-            Holder.Parent = Slider
-            Holder.AnchorPoint = Vector2.new(1, 0)
-            Holder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Holder.BackgroundTransparency = 1
-            Holder.ClipsDescendants = true
-            Holder.Position = UDim2.new(0.965517223, 0, 0.13333334, -2)
-            Holder.Size = UDim2.new(0.694068968, 0, 0.466666669, 0)
-            Holder.ZIndex = 10
+    -- UI 元件
+    local Slider = Instance.new("Frame")
+    Slider.Name = "Slider"
+    Slider.Size = UDim2.new(1, 0, 0, 30)
+    Slider.BackgroundTransparency = 1
+    Slider.Parent = holder -- 你的父容器
 
-            Text_6.Name = "Text"
-            Text_6.Parent = Holder
-            Text_6.Active = false
-            Text_6.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Text_6.BackgroundTransparency = 1
-            Text_6.Position = UDim2.new(-0.0320001729, 0, 0.159999996, 0)
-            Text_6.Selectable = false
-            Text_6.Size = UDim2.new(1, 0, 1, 0)
-            Text_6.Font = Enum.Font.GothamBold
-            Text_6.PlaceholderColor3 = Color3.fromRGB(200, 200, 200)
-            Text_6.PlaceholderText = "0"
-            Text_6.Text = ""
-            Text_6.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Text_6.TextSize = 12.000
-            Text_6.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-            Text_6.TextStrokeTransparency = 0.920
-            Text_6.TextXAlignment = Enum.TextXAlignment.Right
-            Text_6.FocusLost:Connect(function()
-                if not tonumber(Text_6.Text) then
-                    Text_6.Text = tonumber(location[flag])
-                else
-                    Text_6.Text = tonumber(Text_6.Text)
-                    Fill.Size = UDim2.new(0,134/math.ceil(min +max) * tonumber(Text_6.Text),0,6)
-                    location[flag] = tonumber(Text_6.Text)
-                    spawn(callback)
-                end
-            end)
+    local Text = Instance.new("TextLabel")
+    Text.Name = "Text"
+    Text.Text = name
+    Text.TextColor3 = Color3.fromRGB(255,255,255)
+    Text.TextSize = 12
+    Text.Font = Enum.Font.GothamBold
+    Text.BackgroundTransparency = 1
+    Text.Size = UDim2.new(1,0,0.5,0)
+    Text.TextXAlignment = Enum.TextXAlignment.Left
+    Text.Parent = Slider
 
-            Slider.Name = "Slider"
-            Slider.Parent = holder
-            Slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Slider.BackgroundTransparency = 1.000
-            Slider.Size = UDim2.new(1, 0, 0, 30)
+    local sliderHolder = Instance.new("Frame")
+    sliderHolder.Size = UDim2.new(1,0,0.5,0)
+    sliderHolder.Position = UDim2.new(0,0,0.5,0)
+    sliderHolder.BackgroundTransparency = 1
+    sliderHolder.Parent = Slider
 
-            Text.Name = "Text"
-            Text.Parent = Slider
-            Text.Active = false
-            Text.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Text.BackgroundTransparency = 1.000
-            Text.Position = UDim2.new(0, 0, 0, 2)
-            Text.Selectable = false
-            Text.Size = UDim2.new(1, 0, 0.5, 0)
-            Text.Font = Enum.Font.GothamBold
-            Text.Text = name
-            Text.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Text.TextSize = 12
-            Text.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-            Text.TextStrokeTransparency = 0.920
-            Text.TextXAlignment = Enum.TextXAlignment.Left
+    local Main2 = Instance.new("ImageLabel")
+    Main2.Size = UDim2.new(1,-10,0,6)
+    Main2.Position = UDim2.new(0.5,0,0.5,0)
+    Main2.AnchorPoint = Vector2.new(0.5,0.5)
+    Main2.Image = "rbxassetid://3570695787"
+    Main2.ImageColor3 = Color3.fromRGB(45,45,45)
+    Main2.ScaleType = Enum.ScaleType.Slice
+    Main2.SliceCenter = Rect.new(100,100,100,100)
+    Main2.SliceScale = 0.12
+    Main2.BackgroundTransparency = 1
+    Main2.Parent = sliderHolder
 
-            sliderHolder.Name = "sliderHolder"
-            sliderHolder.Parent = Slider
-            sliderHolder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            sliderHolder.BackgroundTransparency = 1.000
-            sliderHolder.Position = UDim2.new(0, -5, 0, 15)
-            sliderHolder.Size = UDim2.new(1, 5, 0.5, 0)
+    local Fill = Instance.new("ImageLabel")
+    Fill.Size = UDim2.new(0, 0, 0, 6)
+    Fill.Image = "rbxassetid://3570695787"
+    Fill.ScaleType = Enum.ScaleType.Slice
+    Fill.SliceCenter = Rect.new(100,100,100,100)
+    Fill.SliceScale = 0.12
+    Fill.BackgroundTransparency = 1
+    Fill.Parent = Main2
 
-            Main2.Name = "Main"
-            Main2.Parent = sliderHolder
-            Main2.AnchorPoint = Vector2.new(0.5, 0.5)
-            Main2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Main2.BackgroundTransparency = 1.000
-            Main2.Position = UDim2.new(0.5, 0, 0.5, 0)
-            Main2.Size = UDim2.new(1, -10, 0, 6)
-            Main2.Image = "rbxassetid://3570695787"
-            Main2.ImageColor3 = Color3.fromRGB(45, 45, 45)
-            Main2.ScaleType = Enum.ScaleType.Slice
-            Main2.SliceCenter = Rect.new(100, 100, 100, 100)
-            Main2.SliceScale = 0.120
+    local Text_6 = Instance.new("TextBox")
+    Text_6.Size = UDim2.new(0.7,0,1,0)
+    Text_6.Position = UDim2.new(0.3,0,0,0)
+    Text_6.BackgroundTransparency = 1
+    Text_6.TextColor3 = Color3.fromRGB(255,255,255)
+    Text_6.Text = tostring(default)
+    Text_6.Font = Enum.Font.GothamBold
+    Text_6.TextSize = 12
+    Text_6.TextXAlignment = Enum.TextXAlignment.Right
+    Text_6.Parent = sliderHolder
 
-            Fill.Name = "Fill"
-            Fill.Parent = Main2
-            Fill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Fill.BackgroundTransparency = 1.000
-            Fill.Size = UDim2.new(0, 50, 0, 6)
-            Fill.Image = "rbxassetid://3570695787"
-            Fill.ScaleType = Enum.ScaleType.Slice
-            Fill.SliceCenter = Rect.new(100, 100, 100, 100)
-            Fill.SliceScale = 0.120
+    -- 初始化
+    location[flag] = default
+    Fill.Size = UDim2.new(0, math.clamp((default - min)/(max - min)*134,0,134), 0, 6)
 
-            UISizeConstraint.Parent = Fill
-            UISizeConstraint.MaxSize = Vector2.new(140, 6)
-            UISizeConstraint.MinSize = Vector2.new(6,6)
+    local MouseDown = false
 
-                location[flag] = default
-                Text_6.Text = default
-                Fill.Size = UDim2.new(0,134/(min +(max - min)) * default,0,6)
-
-           local MouseDown = false
-
-    local function MakeChange(startPosX)
-        MouseDown = true
-        local connection
-        connection = RunService.RenderStepped:Connect(function()
-            if MouseDown then
-                local mouseX = UIS:GetMouseLocation().X
-                local delta = math.clamp(mouseX - startPosX, 0, 134) -- 限制 Fill 寬度
-                Fill.Size = UDim2.new(0, delta, 0, 6)
-
-                -- 計算數值
-                if precise then
-                    location[flag] = min + math.ceil(((max - min)/134) * delta)
-                else
-                    location[flag] = min + roundDecimals(((max - min)/134) * delta, 2)
-                end
-                Text_6.Text = tostring(location[flag])
-                spawn(callback)
-            else
-                connection:Disconnect()
-            end
-        end)
+    local function UpdateFill(deltaX)
+        deltaX = math.clamp(deltaX,0,134)
+        Fill.Size = UDim2.new(0, deltaX,0,6)
+        if precise then
+            location[flag] = min + math.ceil((max-min)/134*deltaX)
+        else
+            location[flag] = min + math.floor((max-min)/134*deltaX*100)/100
+        end
+        Text_6.Text = tostring(location[flag])
+        spawn(callback)
     end
 
+    -- 鼠標拖動
     Fill.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local startPosX = UIS:GetMouseLocation().X - Fill.AbsoluteSize.X
-            MakeChange(startPosX)
+            MouseDown = true
+            local startX = UIS:GetMouseLocation().X - Fill.AbsoluteSize.X
+            local conn
+            conn = RunService.RenderStepped:Connect(function()
+                if MouseDown then
+                    local mouseX = UIS:GetMouseLocation().X
+                    local delta = mouseX - sliderHolder.AbsolutePosition.X
+                    UpdateFill(delta)
+                else
+                    conn:Disconnect()
+                end
+            end)
         end
     end)
 
@@ -554,6 +507,14 @@ function Window:Slider(name, options, callback)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             MouseDown = false
         end
+    end)
+
+    -- TextBox 輸入
+    Text_6.FocusLost:Connect(function()
+        local val = tonumber(Text_6.Text) or default
+        val = math.clamp(val,min,max)
+        location[flag] = val
+        UpdateFill((val-min)/(max-min)*134)
     end)
 end
 
