@@ -1,5 +1,4 @@
--- Credit to original!!!
---https://v3rmillion.net/member.php?action=profile&uid=1715331
+    --https://v3rmillion.net/member.php?action=profile&uid=1715331
     local Lib = {}
     if game.CoreGui:FindFirstChild("Lib") then
         game.CoreGui:FindFirstChild("Lib"):Destroy()
@@ -211,31 +210,33 @@ UIS.InputChanged:Connect(function(input)
         mousePos = Vector2.new(input.Position.X, input.Position.Y)
     end
 end)
-       function AddDrag(frame1,frame2)
+function AddDrag(frame1, frame2)
     local dragging = false
     local dragStart = Vector2.new()
     local startPos = UDim2.new()
 
-    frame.InputBegan:Connect(function(input)
+    frame1.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
-            startPos = frame.Position
+            startPos = frame1.Position
         end
     end)
 
-    frame.InputEnded:Connect(function(input)
+    frame1.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
 
-    frame.InputChanged:Connect(function(input)
+    frame1.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragStart
-            frame.Position = UDim2.new(
-                startPos.X.Scale, startPos.X.Offset + delta.X,
-                startPos.Y.Scale, startPos.Y.Offset + delta.Y
+            frame1.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
             )
         end
     end)
