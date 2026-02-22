@@ -1,4 +1,4 @@
--- slider fixed
+--slider fixed 2
 --https://v3rmillion.net/member.php?action=profile&uid=1715331
     local Lib = {}
     if game.CoreGui:FindFirstChild("Lib") then
@@ -430,11 +430,15 @@ function Window:Slider(name, options, callback)
     Text.TextXAlignment = Enum.TextXAlignment.Left
     Text.Parent = Slider
 
-    local sliderHolder = Instance.new("Frame")
-    sliderHolder.Size = UDim2.new(1,0,0.5,0)
-    sliderHolder.Position = UDim2.new(0,0,0.5,0)
-    sliderHolder.BackgroundTransparency = 1
-    sliderHolder.Parent = Slider
+                sliderHolder.Name = "sliderHolder"
+            sliderHolder.Parent = Slider
+            sliderHolder.AnchorPoint = Vector2.new(1, 0)
+            sliderHolder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            sliderHolder.BackgroundTransparency = 1
+            sliderHolder.ClipsDescendants = true
+            sliderHolder.Position = UDim2.new(0.965517223, 0, 0.13333334, -2)
+            sliderHolder.Size = UDim2.new(0.694068968, 0, 0.466666669, 0)
+            sliderHolder.ZIndex = 10
 
     local Main2 = Instance.new("ImageLabel")
     Main2.Size = UDim2.new(1,-10,0,6)
