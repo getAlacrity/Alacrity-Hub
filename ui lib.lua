@@ -1,4 +1,4 @@
--- fixed
+-- slider fixed
 --https://v3rmillion.net/member.php?action=profile&uid=1715331
     local Lib = {}
     if game.CoreGui:FindFirstChild("Lib") then
@@ -469,8 +469,8 @@ function Window:Slider(name, options, callback)
     Text_6.Parent = sliderHolder
 
     -- 初始化
-    location[flag] = default
-    Fill.Size = UDim2.new(0, math.clamp((default - min)/(max - min)*134,0,134), 0, 6)
+     location[flag] = default
+     Fill.Size = UDim2.new(0,134/(min +(max - min)) * default,0,6)
 
     local MouseDown = false
 
