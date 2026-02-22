@@ -1,5 +1,4 @@
---slider fixed 2
---https://v3rmillion.net/member.php?action=profile&uid=1715331
+    --https://v3rmillion.net/member.php?action=profile&uid=1715331
     local Lib = {}
     if game.CoreGui:FindFirstChild("Lib") then
         game.CoreGui:FindFirstChild("Lib"):Destroy()
@@ -404,20 +403,30 @@ AddDrag(Title_2, Main)
         end
 
 function Window:Slider(name, options, callback)
-    local default = options.default or options.min
+    local UIS = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+
+    local default = options.default or options.min or 0
     local min = options.min or 0
     local max = options.max or 1
     local location = options.location or self.flags
     local precise = options.precise or false
     local flag = options.flag or ""
-    local callback = callback or function() end
+    callback = callback or function() end
 
-    -- UI 元件
+    --------------------------------------------------
+    -- Main Slider Frame
+    --------------------------------------------------
+
     local Slider = Instance.new("Frame")
     Slider.Name = "Slider"
     Slider.Size = UDim2.new(1, 0, 0, 30)
     Slider.BackgroundTransparency = 1
-    Slider.Parent = holder -- 你的父容器
+    Slider.Parent = holder
+
+    --------------------------------------------------
+    -- Title Text
+    --------------------------------------------------
 
     local Text = Instance.new("TextLabel")
     Text.Name = "Text"
@@ -426,101 +435,165 @@ function Window:Slider(name, options, callback)
     Text.TextSize = 12
     Text.Font = Enum.Font.GothamBold
     Text.BackgroundTransparency = 1
-    Text.Size = UDim2.new(1,0,0.5,0)
+    Text.Size = UDim2.new(1,0,0,14)
+    Text.Position = UDim2.new(0,0,0,0)
     Text.TextXAlignment = Enum.TextXAlignment.Left
     Text.Parent = Slider
 
-                sliderHolder.Name = "sliderHolder"
-            sliderHolder.Parent = Slider
-            sliderHolder.AnchorPoint = Vector2.new(1, 0)
-            sliderHolder.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            sliderHolder.BackgroundTransparency = 1
-            sliderHolder.ClipsDescendants = true
-            sliderHolder.Position = UDim2.new(0.965517223, 0, 0.13333334, -2)
-            sliderHolder.Size = UDim2.new(0.694068968, 0, 0.466666669, 0)
-            sliderHolder.ZIndex = 10
+    --------------------------------------------------
+    -- Slider Holder
+    --------------------------------------------------
 
-    local Main2 = Instance.new("ImageLabel")
-    Main2.Size = UDim2.new(1,-10,0,6)
-    Main2.Position = UDim2.new(0.5,0,0.5,0)
-    Main2.AnchorPoint = Vector2.new(0.5,0.5)
-    Main2.Image = "rbxassetid://3570695787"
-    Main2.ImageColor3 = Color3.fromRGB(45,45,45)
-    Main2.ScaleType = Enum.ScaleType.Slice
-    Main2.SliceCenter = Rect.new(100,100,100,100)
-    Main2.SliceScale = 0.12
-    Main2.BackgroundTransparency = 1
-    Main2.Parent = sliderHolder
+    local sliderHolder = Instance.new("Frame")
+    sliderHolder.Name = "sliderHolder"
+    sliderHolder.BackgroundTransparency = 1
+    sliderHolder.Position = UDim2.new(0,0,0,15)
+    sliderHolder.Size = UDim2.new(1,0,0,15)
+    sliderHolder.Parent = Slider
+
+    --------------------------------------------------
+    -- Slider Background
+    --------------------------------------------------
+
+    local Main = Instance.new("ImageLabel")
+    Main.Size = UDim2.new(1,-10,0,6)
+    Main.Position = UDim2.new(0.5,0,0.5,0)
+    Main.AnchorPoint = Vector2.new(0.5,0.5)
+    Main.Image = "rbxassetid://3570695787"
+    Main.ImageColor3 = Color3.fromRGB(45,45,45)
+    Main.ScaleType = Enum.ScaleType.Slice
+    Main.SliceCenter = Rect.new(100,100,100,100)
+    Main.SliceScale = 0.12
+    Main.BackgroundTransparency = 1
+    Main.Parent = sliderHolder
+
+    --------------------------------------------------
+    -- Fill
+    --------------------------------------------------
 
     local Fill = Instance.new("ImageLabel")
-    Fill.Size = UDim2.new(0, 0, 0, 6)
+    Fill.Size = UDim2.new(0,0,0,6)
     Fill.Image = "rbxassetid://3570695787"
     Fill.ScaleType = Enum.ScaleType.Slice
     Fill.SliceCenter = Rect.new(100,100,100,100)
     Fill.SliceScale = 0.12
     Fill.BackgroundTransparency = 1
-    Fill.Parent = Main2
+    Fill.Parent = Main
 
-    local Text_6 = Instance.new("TextBox")
-    Text_6.Size = UDim2.new(0.7,0,1,0)
-    Text_6.Position = UDim2.new(0.3,0,0,0)
-    Text_6.BackgroundTransparency = 1
-    Text_6.TextColor3 = Color3.fromRGB(255,255,255)
-    Text_6.Text = tostring(default)
-    Text_6.Font = Enum.Font.GothamBold
-    Text_6.TextSize = 12
-    Text_6.TextXAlignment = Enum.TextXAlignment.Right
-    Text_6.Parent = sliderHolder
+    --------------------------------------------------
+    -- Value Text
+    --------------------------------------------------
 
-    -- 初始化
-     location[flag] = default
-     Fill.Size = UDim2.new(0,134/(min +(max - min)) * default,0,6)
+    local Value = Instance.new("TextBox")
+    Value.Size = UDim2.new(0.3,0,0,14)
+    Value.Position = UDim2.new(0.7,0,0,0)
+    Value.BackgroundTransparency = 1
+    Value.TextColor3 = Color3.fromRGB(255,255,255)
+    Value.Font = Enum.Font.GothamBold
+    Value.TextSize = 12
+    Value.TextXAlignment = Enum.TextXAlignment.Right
+    Value.Parent = Slider
 
-    local MouseDown = false
+    --------------------------------------------------
+    -- Logic
+    --------------------------------------------------
 
-    local function UpdateFill(deltaX)
-        deltaX = math.clamp(deltaX,0,134)
-        Fill.Size = UDim2.new(0, deltaX,0,6)
+    local dragging = false
+    local maxWidth = 134
+
+    local function SetValueFromWidth(width)
+        width = math.clamp(width,0,maxWidth)
+
+        Fill.Size = UDim2.new(0,width,0,6)
+
+        local percent = width / maxWidth
+        local val = min + (max-min)*percent
+
         if precise then
-            location[flag] = min + math.ceil((max-min)/134*deltaX)
+            val = math.floor(val)
         else
-            location[flag] = min + math.floor((max-min)/134*deltaX*100)/100
+            val = math.floor(val*100)/100
         end
-        Text_6.Text = tostring(location[flag])
-        spawn(callback)
+
+        location[flag] = val
+        Value.Text = tostring(val)
+
+        task.spawn(callback,val)
     end
 
-    -- 鼠標拖動
-    Fill.InputBegan:Connect(function(input)
+    --------------------------------------------------
+    -- Drag System (NO LocalPlayer)
+    --------------------------------------------------
+
+    Main.InputBegan:Connect(function(input)
+
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            MouseDown = true
-            local startX = UIS:GetMouseLocation().X - Fill.AbsoluteSize.X
+
+            dragging = true
+
             local conn
             conn = RunService.RenderStepped:Connect(function()
-                if MouseDown then
-                    local mouseX = UIS:GetMouseLocation().X
-                    local delta = mouseX - sliderHolder.AbsolutePosition.X
-                    UpdateFill(delta)
-                else
+
+                if not dragging then
                     conn:Disconnect()
+                    return
                 end
+
+                local mouseX = UIS:GetMouseLocation().X
+                local start = Main.AbsolutePosition.X
+
+                SetValueFromWidth(mouseX - start)
+
             end)
+
         end
+
     end)
 
-    Fill.InputEnded:Connect(function(input)
+    Main.InputEnded:Connect(function(input)
+
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            MouseDown = false
+            dragging = false
         end
+
     end)
 
-    -- TextBox 輸入
-    Text_6.FocusLost:Connect(function()
-        local val = tonumber(Text_6.Text) or default
+    --------------------------------------------------
+    -- Text input
+    --------------------------------------------------
+
+    Value.FocusLost:Connect(function()
+
+        local val = tonumber(Value.Text) or default
+
         val = math.clamp(val,min,max)
-        location[flag] = val
-        UpdateFill((val-min)/(max-min)*134)
+
+        local percent = (val-min)/(max-min)
+
+        SetValueFromWidth(percent*maxWidth)
+
     end)
+
+    --------------------------------------------------
+    -- Default
+    --------------------------------------------------
+
+    location[flag] = default
+    Value.Text = tostring(default)
+
+    task.defer(function()
+        local percent = (default-min)/(max-min)
+        SetValueFromWidth(percent*maxWidth)
+    end)
+
+    --------------------------------------------------
+    -- CRITICAL FIX: Update Window Height
+    --------------------------------------------------
+
+    task.defer(function()
+        Update(Slider.AbsoluteSize.Y)
+    end)
+
 end
 
         function Window:Dropdown(name, options, callback)
