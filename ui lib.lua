@@ -202,14 +202,9 @@
             end
         end
         
-        local UIS = game:GetService("UserInputService")
-local mousePos = Vector2.new(0, 0)
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
-UIS.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        mousePos = Vector2.new(input.Position.X, input.Position.Y)
-    end
-end)
 function AddDrag(frame1, frame2)
     local dragging = false
     local dragStart = Vector2.new()
@@ -219,7 +214,7 @@ function AddDrag(frame1, frame2)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
-            startPos = frame1.Position
+            startPos = frame2.Position
         end
     end)
 
@@ -230,18 +225,27 @@ function AddDrag(frame1, frame2)
     end)
 
     frame1.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            frame1.Position = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset + delta.Y
-            )
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            local connection
+            connection = RunService.RenderStepped:Connect(function()
+                if dragging then
+                    local delta = input.Position - dragStart
+                    frame2.Position = UDim2.new(
+                        startPos.X.Scale,
+                        startPos.X.Offset + delta.X,
+                        startPos.Y.Scale,
+                        startPos.Y.Offset + delta.Y
+                    )
+                else
+                    connection:Disconnect()
+                end
+            end)
         end
     end)
 end
-        AddDrag(Title_2,Main)
+
+-- 使用範例
+AddDrag(Title_2, Main)
         
         function Window:Button(name, callback)
             local callback = callback or function() end
