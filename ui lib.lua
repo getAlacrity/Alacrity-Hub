@@ -1,10 +1,15 @@
     --https://v3rmillion.net/member.php?action=profile&uid=1715331
+
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
     local Lib = {}
     if game.CoreGui:FindFirstChild("Lib") then
         game.CoreGui:FindFirstChild("Lib"):Destroy()
     end
     local ScreenGui = Instance.new("ScreenGui",game.CoreGui)
     ScreenGui.Name = "Lib"
+
     local roundDecimals = function(num, places)
         places = math.pow(10, places or 0)
         num = num * places
@@ -21,26 +26,263 @@
     if _G.HideKeybind == nil then
         _G.HideKeybind = Enum.KeyCode.RightControl
     end
-    Usp.InputBegan:Connect(function(key)
-        if key.KeyCode == _G.HideKeybind and Usable then
-            Usable = false
-    		for i,v in pairs(ScreenGui:GetChildren()) do
-    		    spawn(function()
-        		    if visible == true then
-        			    v:TweenPosition(UDim2.new(0,v.AbsolutePosition.X,0,v.AbsolutePosition.Y - 500),Enum.EasingDirection.In,Enum.EasingStyle.Sine,0.5,true)
-        			    wait(0.5)
-        			    v.Visible = false
-        			else
-        			    v.Visible = true
-        			    v:TweenPosition(UDim2.new(0,v.AbsolutePosition.X,0,v.AbsolutePosition.Y + 500),Enum.EasingDirection.In,Enum.EasingStyle.Sine,0.5,true)
-        		    end
-    		    end)
-		        wait(0.05)
-            end
-            Usable = true
-    		visible = not visible
-    	end
-    end)
+    local Usp = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+local visible = true
+local Usable = true
+
+if _G.HideKeybind == nil then
+    _G.HideKeybind = Enum.KeyCode.RightControl
+end
+
+--==============================
+-- Blur Effect
+--==============================
+local Blur = Lighting:FindFirstChild("AlacrityUIBlur")
+if not Blur then
+    Blur = Instance.new("BlurEffect")
+    Blur.Name = "AlacrityUIBlur"
+    Blur.Size = 0
+    Blur.Enabled = true
+    Blur.Parent = Lighting
+end
+
+local TweenInfoSettings = TweenInfo.new(
+    0.5,
+    Enum.EasingStyle.Sine,
+    Enum.EasingDirection.InOut
+)
+
+--==============================
+-- 取得可 Tween 的 GUI 物件
+--==============================
+local function GetGuiTransparencyObjects(gui)
+    local objects = {}
+
+    for _, obj in ipairs(gui:GetDescendants()) do
+        if obj:IsA("Frame")
+            or obj:IsA("TextLabel")
+            or obj:IsA("TextButton")
+            or obj:IsA("TextBox")
+            or obj:IsA("ImageLabel")
+            or obj:IsA("ImageButton")
+            or obj:IsA("ScrollingFrame")
+            or obj:IsA("ViewportFrame")
+        then
+            table.insert(objects, obj)
+        end
+    end
+
+    return objects
+end
+
+--==============================
+-- 記錄原始透明度
+--==============================
+local OriginalTransparency = {}
+
+local function SaveTransparency(obj)
+    if OriginalTransparency[obj] then
+        return
+    end
+
+    OriginalTransparency[obj] = {
+        BackgroundTransparency = obj.BackgroundTransparency
+    }
+
+    if obj:IsA("TextLabel")
+        or obj:IsA("TextButton")
+        or obj:IsA("TextBox")
+    then
+        OriginalTransparency[obj].TextTransparency =
+            obj.TextTransparency
+        OriginalTransparency[obj].TextStrokeTransparency =
+            obj.TextStrokeTransparency
+    end
+
+    if obj:IsA("ImageLabel")
+        or obj:IsA("ImageButton")
+    then
+        OriginalTransparency[obj].ImageTransparency =
+            obj.ImageTransparency
+    end
+
+    if obj:IsA("ScrollingFrame") then
+        OriginalTransparency[obj].ScrollBarImageTransparency =
+            obj.ScrollBarImageTransparency
+    end
+end
+
+--==============================
+-- 建立透明度 Tween
+--==============================
+local function CreateTransparencyTween(obj, targetAlpha)
+    SaveTransparency(obj)
+
+    local original = OriginalTransparency[obj]
+    local goal = {}
+
+    -- Background
+    if original.BackgroundTransparency ~= nil then
+        if targetAlpha == 1 then
+            goal.BackgroundTransparency = 1
+        else
+            goal.BackgroundTransparency =
+                original.BackgroundTransparency
+        end
+    end
+
+    -- Text
+    if original.TextTransparency ~= nil then
+        if targetAlpha == 1 then
+            goal.TextTransparency = 1
+        else
+            goal.TextTransparency =
+                original.TextTransparency
+        end
+    end
+
+    if original.TextStrokeTransparency ~= nil then
+        if targetAlpha == 1 then
+            goal.TextStrokeTransparency = 1
+        else
+            goal.TextStrokeTransparency =
+                original.TextStrokeTransparency
+        end
+    end
+
+    -- Image
+    if original.ImageTransparency ~= nil then
+        if targetAlpha == 1 then
+            goal.ImageTransparency = 1
+        else
+            goal.ImageTransparency =
+                original.ImageTransparency
+        end
+    end
+
+    -- ScrollBar
+    if original.ScrollBarImageTransparency ~= nil then
+        if targetAlpha == 1 then
+            goal.ScrollBarImageTransparency = 1
+        else
+            goal.ScrollBarImageTransparency =
+                original.ScrollBarImageTransparency
+        end
+    end
+
+    return TweenService:Create(
+        obj,
+        TweenInfoSettings,
+        goal
+    )
+end
+
+--==============================
+-- 隱藏 UI（漸隱 + Blur）
+--==============================
+local function HideUI()
+    local guiObjects = GetGuiTransparencyObjects(ScreenGui)
+
+    -- 模糊畫面
+    TweenService:Create(
+        Blur,
+        TweenInfoSettings,
+        { Size = 24 }
+    ):Play()
+
+    -- 漸隱
+    for _, obj in ipairs(guiObjects) do
+        local tween = CreateTransparencyTween(obj, 1)
+        tween:Play()
+    end
+
+    task.wait(0.5)
+
+    -- 完全隱藏頂層視窗
+    for _, v in ipairs(ScreenGui:GetChildren()) do
+        if v:IsA("GuiObject") then
+            v.Visible = false
+        end
+    end
+end
+
+--==============================
+-- 顯示 UI（先 Visible，再漸顯，最後移除 Blur）
+--==============================
+local function ShowUI()
+    -- 先顯示頂層視窗
+    for _, v in ipairs(ScreenGui:GetChildren()) do
+        if v:IsA("GuiObject") then
+            v.Visible = true
+        end
+    end
+
+    local guiObjects = GetGuiTransparencyObjects(ScreenGui)
+
+    -- 先全部設成透明
+    for _, obj in ipairs(guiObjects) do
+        SaveTransparency(obj)
+
+        obj.BackgroundTransparency = 1
+
+        if obj:IsA("TextLabel")
+            or obj:IsA("TextButton")
+            or obj:IsA("TextBox")
+        then
+            obj.TextTransparency = 1
+            obj.TextStrokeTransparency = 1
+        end
+
+        if obj:IsA("ImageLabel")
+            or obj:IsA("ImageButton")
+        then
+            obj.ImageTransparency = 1
+        end
+
+        if obj:IsA("ScrollingFrame") then
+            obj.ScrollBarImageTransparency = 1
+        end
+    end
+
+    -- 漸顯
+    for _, obj in ipairs(guiObjects) do
+        local tween = CreateTransparencyTween(obj, 0)
+        tween:Play()
+    end
+
+    -- 模糊淡出
+    local blurTween = TweenService:Create(
+        Blur,
+        TweenInfoSettings,
+        { Size = 0 }
+    )
+    blurTween:Play()
+end
+
+--==============================
+-- Keybind
+--==============================
+Usp.InputBegan:Connect(function(key, gpe)
+    if gpe then
+        return
+    end
+
+    if key.KeyCode == _G.HideKeybind and Usable then
+        Usable = false
+
+        if visible then
+            HideUI()
+        else
+            ShowUI()
+        end
+
+        visible = not visible
+        Usable = true
+    end
+end)
     function Lib:CreateWindow(Name)
         local Window = {}
 
