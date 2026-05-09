@@ -181,17 +181,10 @@ local function CreateTransparencyTween(obj, targetAlpha)
 end
 
 --==============================
--- 隱藏 UI（漸隱 + Blur）
+-- 隱藏 UI（只有漸隱，不加 Blur）
 --==============================
 local function HideUI()
     local guiObjects = GetGuiTransparencyObjects(ScreenGui)
-
-    -- 模糊畫面
-    TweenService:Create(
-        Blur,
-        TweenInfoSettings,
-        { Size = 24 }
-    ):Play()
 
     -- 漸隱
     for _, obj in ipairs(guiObjects) do
@@ -207,13 +200,19 @@ local function HideUI()
             v.Visible = false
         end
     end
+
+    -- 確保沒有模糊效果
+    Blur.Size = 0
 end
 
 --==============================
--- 顯示 UI（先 Visible，再漸顯，最後移除 Blur）
+-- 顯示 UI（先加 Blur，再漸顯，最後 Blur 淡出）
 --==============================
 local function ShowUI()
-    -- 先顯示頂層視窗
+    -- 先將畫面設為模糊
+    Blur.Size = 24
+
+    -- 顯示頂層視窗
     for _, v in ipairs(ScreenGui:GetChildren()) do
         if v:IsA("GuiObject") then
             v.Visible = true
@@ -247,19 +246,18 @@ local function ShowUI()
         end
     end
 
-    -- 漸顯
+    -- UI 漸顯
     for _, obj in ipairs(guiObjects) do
         local tween = CreateTransparencyTween(obj, 0)
         tween:Play()
     end
 
-    -- 模糊淡出
-    local blurTween = TweenService:Create(
+    -- Blur 漸漸消失
+    TweenService:Create(
         Blur,
         TweenInfoSettings,
         { Size = 0 }
-    )
-    blurTween:Play()
+    ):Play()
 end
 
 --==============================
