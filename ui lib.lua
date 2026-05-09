@@ -1,4 +1,4 @@
--- Updated and fixed by rty
+--Updated and fixed by rty
 --https://v3rmillion.net/member.php?action=profile&uid=1715331
 
 local TweenService = game:GetService("TweenService")
@@ -209,11 +209,11 @@ end
 --==============================
 -- 顯示 UI（先加 Blur，再漸顯，最後 Blur 淡出）
 --==============================
+--==============================
+-- 顯示 UI（Blur 與 UI 同步漸顯）
+--==============================
 local function ShowUI()
-    -- 先將畫面設為模糊
-    Blur.Size = 24
-
-    -- 顯示頂層視窗
+    -- 先顯示頂層視窗
     for _, v in ipairs(ScreenGui:GetChildren()) do
         if v:IsA("GuiObject") then
             v.Visible = true
@@ -222,7 +222,7 @@ local function ShowUI()
 
     local guiObjects = GetGuiTransparencyObjects(ScreenGui)
 
-    -- 先全部設成透明
+    -- 先把所有物件設為透明
     for _, obj in ipairs(guiObjects) do
         SaveTransparency(obj)
 
@@ -247,18 +247,21 @@ local function ShowUI()
         end
     end
 
+    -- 從較小的模糊開始，避免「先很模糊再瞬間消失」的感覺
+    Blur.Size = 12
+
     -- UI 漸顯
     for _, obj in ipairs(guiObjects) do
-        local tween = CreateTransparencyTween(obj, 0)
-        tween:Play()
+        CreateTransparencyTween(obj, 0):Play()
     end
 
-    -- Blur 漸漸消失
-    TweenService:Create(
+    -- Blur 同步平滑淡出到 0
+    local blurTween = TweenService:Create(
         Blur,
         TweenInfoSettings,
         { Size = 0 }
-    ):Play()
+    )
+    blurTween:Play()
 end
 
 --==============================
