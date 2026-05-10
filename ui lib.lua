@@ -1032,115 +1032,103 @@ end
                 end
             end)
         end
-       function Window:Bind(name, options, callback)
-    local UIS = game:GetService("UserInputService")
+        function Window:Bind(name, options, callback)
+            local location     = options.location or self.flags
+            local flag         = options.flag or ""
+            local callback     = callback or function() end
+            local default      = options.default or false
 
-    local location = options.location or self.flags
-    local flag = options.flag or ""
-    local callback = callback or function() end
-    local default = options.default or nil
+            location[flag]     = default
 
-    location[flag] = default
+            local Hotkey = Instance.new("Frame")
+            local Key = Instance.new("TextButton")
+            local Text_4 = Instance.new("TextButton")
 
-    local Hotkey = Instance.new("Frame")
-    local Key = Instance.new("TextButton")
-    local Text_4 = Instance.new("TextButton")
+            Hotkey.Name = "Hotkey"
+            Hotkey.Parent = holder
+            Hotkey.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Hotkey.BackgroundTransparency = 1.000
+            Hotkey.Size = UDim2.new(1, 0, 0, 25)
+            
+            Key.Name = "Key"
+            Key.Parent = Hotkey
+            Key.Active = false
+            Key.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Key.BackgroundTransparency = 1.000
+            Key.Position = UDim2.new(0.420689642, 0, 0, 0)
+            Key.Selectable = false
+            Key.Size = UDim2.new(0.524137914, 0, 1, 0)
+            Key.Font = Enum.Font.GothamBold
+            Key.Text = "F"
+            Key.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Key.TextSize = 12.000
+            Key.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+            Key.TextStrokeTransparency = 0.920
+            Key.TextXAlignment = Enum.TextXAlignment.Right
 
-    Hotkey.Name = "Hotkey"
-    Hotkey.Parent = holder
-    Hotkey.BackgroundTransparency = 1
-    Hotkey.Size = UDim2.new(1, 0, 0, 25)
+            if default ~= false then
+                Key.Text = string.sub(tostring(default),14,999)
+            end
 
-    Key.Parent = Hotkey
-    Key.BackgroundTransparency = 1
-    Key.Position = UDim2.new(0.42, 0, 0, 0)
-    Key.Size = UDim2.new(0.58, 0, 1, 0)
-    Key.Font = Enum.Font.GothamBold
-    Key.Text = "None"
-    Key.TextColor3 = Color3.fromRGB(255,255,255)
-    Key.TextSize = 12
-    Key.TextXAlignment = Enum.TextXAlignment.Right
+            Text_4.Name = "Text"
+            Text_4.Parent = Hotkey
+            Text_4.Active = false
+            Text_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Text_4.BackgroundTransparency = 1.000
+            Text_4.Selectable = false
+            Text_4.Size = UDim2.new(1, 0, 1, 0)
+            Text_4.Font = Enum.Font.GothamBold
+            Text_4.Text = name
+            Text_4.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Text_4.TextSize = 12.000
+            Text_4.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
+            Text_4.TextStrokeTransparency = 0.920
+            Text_4.TextXAlignment = Enum.TextXAlignment.Left
 
-    Text_4.Parent = Hotkey
-    Text_4.BackgroundTransparency = 1
-    Text_4.Size = UDim2.new(1,0,1,0)
-    Text_4.Font = Enum.Font.GothamBold
-    Text_4.Text = name
-    Text_4.TextColor3 = Color3.fromRGB(255,255,255)
-    Text_4.TextSize = 12
-    Text_4.TextXAlignment = Enum.TextXAlignment.Left
+            local Player = game:GetService("Players").LocalPlayer
+            local Mouse = Player:GetMouse()
+            local Usable = true
+            local Paterns = {{"Right","R"},{"Left","L"},{"Control","Ctrl"}}
+            local function CheckName(key)
+                local Name = string.sub(tostring(key.KeyCode),14,999)
+                for i,v in pairs(Paterns) do
+                    Name = string.gsub(Name,v[1],v[2])
+                end
+                return Name
+            end
+            Check = game:GetService("UserInputService").InputBegan:Connect(function(key)
+                if Usable == true and not game:GetService("UserInputService"):GetFocusedTextBox() then
+                    if key.KeyCode == location[flag] then
+                        spawn(callback)
+                    end
+                    if not Hotkey:IsDescendantOf(game) then
+                        Check:Disconnect()
+                    end
+                end
+            end)
 
-    local listening = false
-    local conn
+            Text_4.MouseButton1Click:Connect(function()
+                Key.Text = "..."
+                Usable = false
+                Check = game:GetService("UserInputService").InputBegan:Connect(function(key)
+                    if key.KeyCode ~= Enum.KeyCode.Unknown and not game:GetService("UserInputService"):GetFocusedTextBox() and key.KeyCode ~= Enum.KeyCode.Escape then
+                        Key.Text = CheckName(key)
+                        location[flag] = key.KeyCode
+                        Check:Disconnect() 
+                        wait(0.1)
+                        Usable = true
+                    elseif key.KeyCode == Enum.KeyCode.Escape then
+                        Key.Text = "nil"
+                        location[flag] = nil
+                        Check:Disconnect() 
+                        wait(0.1)
+                        Usable = true
+                    end
+                end)
+            end)
 
-    local UIS = game:GetService("UserInputService")
-
-local function formatInput(input)
-    if input.UserInputType == Enum.UserInputType.Keyboard then
-        return {Type = "Key", Key = input.KeyCode}
-    elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-        return {Type = "Mouse", Key = "Mouse1"}
-    elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-        return {Type = "Mouse", Key = "Mouse2"}
-    end
-end
-
-    local function match(input)
-        local bind = location[flag]
-
-        if not bind then return false end
-
-        if bind == "Mouse1" then
-            return input.UserInputType == Enum.UserInputType.MouseButton1
-        elseif bind == "Mouse2" then
-            return input.UserInputType == Enum.UserInputType.MouseButton2
-        else
-            return input.KeyCode == bind
+            Update(25)
         end
-    end
-
-    UIS.InputBegan:Connect(function(input, gpe)
-        if gpe then return end
-        if listening then return end
-
-        if match(input) then
-            task.spawn(callback)
-        end
-    end)
-
-    Text_4.MouseButton1Click:Connect(function()
-        Key.Text = "..."
-        listening = true
-
-        if conn then conn:Disconnect() end
-
-        conn = UIS.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Escape then
-        Key.Text = "None"
-        location[flag] = nil
-        conn:Disconnect()
-        listening = false
-        return
-    end
-
-    local data = formatInput(input)
-    if not data then return end
-
-    location[flag] = data
-
-    if data.Type == "Key" then
-        Key.Text = tostring(data.Key):gsub("Enum.KeyCode.", "")
-    else
-        Key.Text = data.Key
-    end
-
-    conn:Disconnect()
-    listening = false
-end)
-    end)
-
-    Update(25)
-end
 
         function Window:Box(name, options, callback)
             local type = options.type or "" or false
