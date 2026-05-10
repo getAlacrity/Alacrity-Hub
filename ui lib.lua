@@ -1073,16 +1073,17 @@ end
     local listening = false
     local conn
 
-    local function format(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            return "Mouse1"
-        elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-            return "Mouse2"
-        elseif input.KeyCode then
-            return tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-        end
-        return "None"
+    local UIS = game:GetService("UserInputService")
+
+local function formatInput(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        return {Type = "Key", Key = input.KeyCode}
+    elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+        return {Type = "Mouse", Key = "Mouse1"}
+    elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+        return {Type = "Mouse", Key = "Mouse2"}
     end
+end
 
     local function match(input)
         local bind = location[flag]
@@ -1114,30 +1115,28 @@ end
         if conn then conn:Disconnect() end
 
         conn = UIS.InputBegan:Connect(function(input)
-            if input.KeyCode == Enum.KeyCode.Escape then
-                Key.Text = "None"
-                location[flag] = nil
-                conn:Disconnect()
-                listening = false
-                return
-            end
+    if input.KeyCode == Enum.KeyCode.Escape then
+        Key.Text = "None"
+        location[flag] = nil
+        conn:Disconnect()
+        listening = false
+        return
+    end
 
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                location[flag] = "Mouse1"
-                Key.Text = "Mouse1"
+    local data = formatInput(input)
+    if not data then return end
 
-            elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-                location[flag] = "Mouse2"
-                Key.Text = "Mouse2"
+    location[flag] = data
 
-            elseif input.KeyCode ~= Enum.KeyCode.Unknown then
-                location[flag] = input.KeyCode
-                Key.Text = tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
-            end
+    if data.Type == "Key" then
+        Key.Text = tostring(data.Key):gsub("Enum.KeyCode.", "")
+    else
+        Key.Text = data.Key
+    end
 
-            conn:Disconnect()
-            listening = false
-        end)
+    conn:Disconnect()
+    listening = false
+end)
     end)
 
     Update(25)
