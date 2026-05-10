@@ -1108,24 +1108,37 @@ end
             end)
 
             Text_4.MouseButton1Click:Connect(function()
-                Key.Text = "..."
-                Usable = false
-                Check = game:GetService("UserInputService").InputBegan:Connect(function(key)
-                    if key.KeyCode ~= Enum.KeyCode.Unknown and not game:GetService("UserInputService"):GetFocusedTextBox() and key.KeyCode ~= Enum.KeyCode.Escape then
-                        Key.Text = CheckName(key)
-                        location[flag] = key.KeyCode
-                        Check:Disconnect() 
-                        wait(0.1)
-                        Usable = true
-                    elseif key.KeyCode == Enum.KeyCode.Escape then
-                        Key.Text = "nil"
-                        location[flag] = nil
-                        Check:Disconnect() 
-                        wait(0.1)
-                        Usable = true
-                    end
-                end)
-            end)
+        Key.Text = "..."
+        listening = true
+
+        if conn then conn:Disconnect() end
+
+        conn = UIS.InputBegan:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.Escape then
+                Key.Text = "None"
+                location[flag] = nil
+                conn:Disconnect()
+                listening = false
+                return
+            end
+
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                Key.Text = "Mouse1"
+                location[flag] = "Mouse1"
+            elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+                Key.Text = "Mouse2"
+                location[flag] = "Mouse2"
+            elseif input.KeyCode ~= Enum.KeyCode.Unknown then
+                Key.Text = tostring(input.KeyCode):gsub("Enum.KeyCode.", "")
+                location[flag] = input.KeyCode
+            else
+                return
+            end
+
+            conn:Disconnect()
+            listening = false
+        end)
+    end)
 
             Update(25)
         end
