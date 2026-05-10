@@ -1,5 +1,5 @@
--- Updated and fixed by rty
--- https://v3rmillion.net/member.php?action=profile&uid=1715331
+--Updated and fixed by rty
+--https://v3rmillion.net/member.php?action=profile&uid=1715331
 
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
